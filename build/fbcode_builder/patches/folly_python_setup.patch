@@ -26,10 +26,10 @@ index e12c1cef2..1b7b66b37 100644
 +
  endif ()
 diff --git a/folly/python/setup.py b/folly/python/setup.py
-index 3678c1542..01c79ddbf 100755
+index 3678c1542..13e4ad3d4 100755
 --- a/folly/python/setup.py
 +++ b/folly/python/setup.py
-@@ -18,29 +18,50 @@
+@@ -18,29 +18,32 @@
  # Cython requires source files in a specific structure, the structure is
  # created as tree of links to the real source files.
  
@@ -46,21 +46,7 @@ index 3678c1542..01c79ddbf 100755
 +print("Building Cython extensions")
 +cxx_flags = os.getenv("FOLLY_PYTHON_CXX_FLAGS", "")
 +extra_compile_args = [f for f in cxx_flags.split(" ") if f]
-+
-+# library_dirs = []
-+# include_dirs = [sysconfig.get_config_var("INCLUDEPY")]
-+
-+# conda_home = os.getenv("CONDA_PREFIX")
-+# if conda_home:
-+#     include_dirs.append(conda_home + "/include")
-+#     library_dirs.append(conda_home + "/lib")
-+
-+libs = ["glog", "folly"]
-+
-+if os.getenv("CXX_SANITIZER"):
-+    extra_compile_args.append("-fsanitize=address")
-+    extra_compile_args.append("-fno-omit-frame-pointer")
-+    libs.append("asan")
++print(f"{extra_compile_args = }")
 +
  exts = [
      Extension(
@@ -70,9 +56,7 @@ index 3678c1542..01c79ddbf 100755
 -        extra_compile_args=[
 -            "-std=c++17",
 -        ],
-+        libraries=libs,
-+        # library_dirs=library_dirs,
-+        # include_dirs=include_dirs,
++        libraries=["glog", "folly"],
 +        extra_compile_args=extra_compile_args,
      ),
      Extension(
@@ -82,25 +66,8 @@ index 3678c1542..01c79ddbf 100755
 -        extra_compile_args=[
 -            "-std=c++17",
 -        ],
-+        libraries=libs,
-+        # library_dirs=library_dirs,
-+        # include_dirs=include_dirs,
++        libraries=["glog", "folly"],
 +        extra_compile_args=extra_compile_args,
      ),
  ]
  
-@@ -51,5 +72,13 @@ setup(
-     package_data={"": ["*.pxd", "*.h"]},
-     setup_requires=["cython"],
-     zip_safe=False,
--    ext_modules=cythonize(exts, compiler_directives={"language_level": 3}),
-+    ext_modules=cythonize(
-+        exts,
-+        compiler_directives={
-+            "language_level": 3,
-+            "binding": False,
-+            "emit_code_comments": False,
-+            "legacy_implicit_noexcept": True,
-+        },
-+    ),
- )
